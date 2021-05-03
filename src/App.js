@@ -89,9 +89,17 @@ const Copyright = () => {
 function App() {
 	const classes = useStyles();
 	const qp = queryString.parse(window.location.search);
+	const [userName,setUserName] = useState('hogehogeのhoge太郎');
+	const iniUserName = () => {
+		let name = window.prompt('なまえをいれてね！','');
+		if (!name) {
+			name = '名無し';
+		}
+		setUserName(name);
+	};
+
 
 	useEffect(() => {
-		
 	});
 
 	return (
@@ -103,7 +111,8 @@ function App() {
             		</Typography>
 				</Toolbar>
 			</AppBar>
-			<Board queryParams={qp} className={classes.main}/>
+			<Typography onClick={() => iniUserName()}>{userName}様</Typography>
+			<Board queryParams={qp} userName={userName} className={classes.main}/>
 			<footer className={classes.footer} >
 				<Copyright />
 			</footer>
@@ -123,7 +132,6 @@ function App() {
 const Board = (props) => {
 	const classes = useStyles();
 	const [inputState,setInputState] = useState(true);
-	const userName = useState(null);
 	const params = props.queryParams;
 	const iniTimes = function (params){
 		let result = {};
@@ -154,6 +162,10 @@ const Board = (props) => {
 	}(params);
 
 	const api = () => {
+		let name = '';
+		while (props.userName === '名無し' || null) {
+			name = window.prompt('なまえをいれてね！','');
+		}
 		fetch('/schedule',{
 			method: 'POST',
 			cache: 'no-cache',
@@ -161,7 +173,7 @@ const Board = (props) => {
 			headers: {
 				'Content-Type': 'application/json'
 				},
-			body: JSON.stringify({times: times,name : userName})
+			body: JSON.stringify({times: times,name : name})
 		}).then(
 			(result) => {
 			},
@@ -212,9 +224,9 @@ const Board = (props) => {
 			</Container>
 			<Box className={classes.toolbar}>
 				<Box className={classes.sample}>
-					<Button onClick={() => {setInputState(null)}} className={classes.sampleBox} style={{backgroundColor: '#ffe887'}} variant="outlined">未定</Button>
-					<Button onClick={() => {setInputState(true)}} className={classes.sampleBox} style={{backgroundColor: '#cbcacb'}} variant="outlined">出席</Button>
-					<Button onClick={() => {setInputState(false)}} className={classes.sampleBox} style={{backgroundColor: '#80c2fc'}} variant="outlined">欠席</Button>	
+					<Button onClick={() => {setInputState(null)}} className={classes.sampleBox} style={{backgroundColor: '#cbcacb'}} variant="outlined">未定</Button>
+					<Button onClick={() => {setInputState(true)}} className={classes.sampleBox} style={{backgroundColor: '#80c2fc'}} variant="outlined">出席</Button>
+					<Button onClick={() => {setInputState(false)}} className={classes.sampleBox} style={{backgroundColor: '#ffe887'}} variant="outlined">欠席</Button>	
 				</Box>
 			</Box>
 		</Container>

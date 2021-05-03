@@ -25,7 +25,11 @@ const useStyles = makeStyles({
         width: 40,
         fontSize: 25,
         marginTop: 15,
-        marginBottom: 15
+        marginBottom: 15,
+        marginRight: 1,
+        marginLeft: 1,
+        borderRadius: 10,
+        color: 'gray'
     }
 })
 
@@ -48,7 +52,7 @@ const DayScheduler = (props) => {
         const id = event.target.id;
         if (id) {
             if (attendance[id] === props.times.find(obj => obj[0] === id)[1]){
-                attendance[id] = !attendance[id];
+                attendance[id] = props.inputState;
                 setAttendance(deepcopy(attendance));
             }
         }
@@ -58,7 +62,7 @@ const DayScheduler = (props) => {
         const id = findElementId(event.touches[0].clientX,event.touches[0].clientY);
         if (id) {
             if (attendance[id] === props.times.find(obj => obj[0] === id)[1]){
-                attendance[id] = !attendance[id];
+                attendance[id] = props.inputState;
                 setAttendance(deepcopy(attendance))
             }
         }
@@ -76,9 +80,11 @@ const DayScheduler = (props) => {
         const time = obj[0];
         const isAttended = attendance[time];
         const timeObj = new Date(time);
-        let backgroundColor = 'green';
-        if (isAttended) {
-            backgroundColor = 'red';
+        let backgroundColor = '#ffe887';
+        if (isAttended === null) {
+            backgroundColor = '#cbcacb';
+        } else if (isAttended) {
+            backgroundColor = '#80c2fc';
         }
         return (
             <div 

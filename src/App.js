@@ -1,7 +1,7 @@
 import './App.css';
 import { useState,useEffect } from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import { Toolbar, Container, Typography, Button } from '@material-ui/core';
+import { Toolbar, Container, Typography, Button, Box} from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import { makeStyles } from "@material-ui/core/styles";
 import queryString from 'query-string';
@@ -10,19 +10,48 @@ import moment from 'moment';
 import DayScheduler from './components/scheduler.js';
 import * as deepcopy from 'deepcopy';
 
+
+
 const useStyles = makeStyles((theme) => ({
 	footer: {
 		padding: theme.spacing(2),
 		height: 80
 	},
 	main: {
-		marginTop: 50
-	},
-	submitButton: {
-		marginTop: 10
+		marginTop: 10,
+		marginLeft: 0,
+		marginRight: 0,
+		paddingLeft: 0,
+		paddingRight: 0
 	},
 	header: {
-		height: 60
+		height: 60,
+	},
+	sample: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		paddingRight: 10,
+		paddingLeft: 10,
+
+	},
+	sampleBox: {
+        fontSize: 20,
+        marginTop: 5,
+        marginBottom: 5,
+        marginRight: 1,
+        marginLeft: 1,
+        borderRadius: 10,
+        color: 'gray'		
+	},
+	toolbar: {
+		width: '100%',
+		backgroundColor: 'white',
+		display: 'flex',
+		position: 'fixed',
+		margin: 0,
+		height: 50,
+		bottom: 0,
+		zIndex: 999
 	}
 }));
 
@@ -74,9 +103,7 @@ function App() {
             		</Typography>
 				</Toolbar>
 			</AppBar>
-
 			<Board queryParams={qp} className={classes.main}/>
-			<Button variant="contained" color="primary" className={classes.submitButton}>送信</Button>
 			<footer className={classes.footer} >
 				<Copyright />
 			</footer>
@@ -84,8 +111,19 @@ function App() {
 	);
 }
 
+
+
+
+
+
+
+
+
+
 const Board = (props) => {
 	const classes = useStyles();
+	const [inputState,setInputState] = useState(true);
+	const userName = useState(null);
 	const params = props.queryParams;
 	const iniTimes = function (params){
 		let result = {};
@@ -115,6 +153,23 @@ const Board = (props) => {
 		return result;
 	}(params);
 
+	const api = () => {
+		fetch('/schedule',{
+			method: 'POST',
+			cache: 'no-cache',
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'application/json'
+				},
+			body: JSON.stringify({times: times,name : userName})
+		}).then(
+			(result) => {
+			},
+			(error) => {
+				console.log(error);
+			}
+		)
+	}
 
 	const [times, setTimes] = useState(iniTimes);
 	const updateAttendance = (datetime,bool) => {
@@ -132,7 +187,7 @@ const Board = (props) => {
 			const days = new Array((endDate - startDate) / (60 * 60 * 1000 * 24) + 1).fill()
 				.map((_, index) => {
 					const day = moment(startDate).add(index, 'd').toDate();
-					return (<DayScheduler update={(datetime,bool) => updateAttendance(datetime,bool)} day={day} times={Object.entries(times).filter(keyVal => moment(new Date(keyVal[0])).isSame(day,'day'))} key={`days-${index}`}/>);
+					return (<DayScheduler inputState={inputState} update={(datetime,bool) => updateAttendance(datetime,bool)} day={day} times={Object.entries(times).filter(keyVal => moment(new Date(keyVal[0])).isSame(day,'day'))} key={`days-${index}`}/>);
 				});
 			return days
 		} catch (error) {
@@ -143,7 +198,25 @@ const Board = (props) => {
 
 	return (
 		<Container className={classes.main}>
-			{calenderElement(params)}
+			<Container>
+				{calenderElement(params)}
+				<Button 
+					variant="contained" 
+					style={{color: 'white'}}
+					color="primary" 
+					className={classes.sampleBox}
+					onClick={() => api()}
+				>
+					送信
+				</Button>
+			</Container>
+			<Box className={classes.toolbar}>
+				<Box className={classes.sample}>
+					<Button onClick={() => {setInputState(null)}} className={classes.sampleBox} style={{backgroundColor: '#ffe887'}} variant="outlined">未定</Button>
+					<Button onClick={() => {setInputState(true)}} className={classes.sampleBox} style={{backgroundColor: '#cbcacb'}} variant="outlined">出席</Button>
+					<Button onClick={() => {setInputState(false)}} className={classes.sampleBox} style={{backgroundColor: '#80c2fc'}} variant="outlined">欠席</Button>	
+				</Box>
+			</Box>
 		</Container>
 	)
 }
